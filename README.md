@@ -19,6 +19,27 @@ This tool is designed for **security testing, auditing, and authorized penetrati
 
 ---
 
+
+Laravel-File-Manager-Auditor/
+│
+├── main.py
+├── cli.py
+├── scanner.py
+├── detectors.py
+├── targets.py
+├── reporter.py
+├── banner.py
+├── utils.py
+│
+├── requirements.txt
+├── README.md
+├── LICENSE
+├── .gitignore
+│
+└── examples
+    └── domains.txt
+
+    
 # Supported Checks
 
 The scanner checks the following endpoints:

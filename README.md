@@ -18,9 +18,16 @@ This tool is designed for **security testing, auditing, and authorized penetrati
 * Modular architecture
 
 ---
+
+Python 3.x
+MIT License
+Maintained
+
+
 requests>=2.31.0
 tqdm>=4.66.0
 rich>=13.7.0
+
 
 
 Laravel-File-Manager-Auditor/

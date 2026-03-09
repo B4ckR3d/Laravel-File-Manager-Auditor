@@ -53,8 +53,8 @@ Each module is responsible for a specific component of the scanning pipeline.
 
 Clone the repository:
 
-git clone https://github.com/yourusername/lfm-auditor
-cd lfm-auditor
+git clone [https://github.com/yourusername/lfm-auditor](https://github.com/B4ckR3d/Laravel-File-Manager-Auditor/)
+cd Laravel-File-Manager-Auditor
 
 Install dependencies:
 

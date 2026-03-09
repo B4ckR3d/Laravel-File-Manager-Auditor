@@ -1,70 +1,59 @@
-import requests
 from concurrent.futures import ThreadPoolExecutor
-from tqdm import tqdm
+from rich.live import Live
+from stats import ScanStats
 from detectors import detect_laravel
+import requests
 from urllib.parse import urljoin
 
-headers = {
-    "User-Agent": "LFM-Audit/2.0"
-}
-
-def check_filemanager(base):
-
-    endpoints = {
-        "initialize": "/file-manager/initialize",
-        "content": "/file-manager/content",
-        "upload": "/file-manager/upload"
-    }
-
-    data = {}
-
-    for name, ep in endpoints.items():
-
-        try:
-            r = requests.get(urljoin(base, ep), headers=headers, timeout=6)
-            data[name] = r.status_code
-        except:
-            data[name] = None
-
-    return data
-
-
-def scan_target(target):
-
-    if not target.startswith("http"):
-        target = "http://" + target
-
-    result = {
-        "target": target,
-        "laravel": False,
-        "filemanager": {}
-    }
-
-    try:
-
-        result["laravel"] = detect_laravel(target)
-
-        if result["laravel"]:
-            result["filemanager"] = check_filemanager(target)
-
-    except:
-        pass
-
-    return result
-
+headers = {"User-Agent": "LFM-Audit/2.0"}
 
 def run_scan(targets, threads):
 
+    stats = ScanStats(len(targets))
     results = []
 
-    with ThreadPoolExecutor(max_workers=threads) as executor:
+    def scan_target(target):
 
-        futures = []
+        if not target.startswith("http"):
+            target = "http://" + target
 
-        for t in targets:
-            futures.append(executor.submit(scan_target, t))
+        result = {
+            "target": target,
+            "laravel": False,
+            "filemanager": {}
+        }
 
-        for f in tqdm(futures):
-            results.append(f.result())
+        try:
+
+            if detect_laravel(target):
+
+                stats.update_laravel()
+
+                result["laravel"] = True
+
+                r = requests.get(
+                    urljoin(target,"/file-manager/initialize"),
+                    headers=headers,
+                    timeout=6
+                )
+
+                if r.status_code == 200:
+                    stats.update_misconfig()
+
+        except:
+            pass
+
+        stats.update_scanned()
+        return result
+
+    with Live(stats.render(), refresh_per_second=4) as live:
+
+        with ThreadPoolExecutor(max_workers=threads) as executor:
+
+            futures = [executor.submit(scan_target, t) for t in targets]
+
+            for f in futures:
+                results.append(f.result())
+                live.update(stats.render())
 
     return results
